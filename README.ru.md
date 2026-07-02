@@ -74,6 +74,17 @@ medbots structure --bot-root ~/my-health
 
 Поддерживаются: **ЕМИАС**, **Медси**, **Гемотест**.
 
+### Apple Health (опционально)
+
+На iPhone: Здоровье → профиль → Экспортировать все данные о здоровье → `export.zip`
+
+```bash
+medbots import-apple-health --zip ~/Downloads/export.zip --bot-root ~/my-health --copy-zip
+medbots validate-apple-health --corpus ~/my-health/structured_database
+```
+
+Создаёт `fitness/BODY_METRICS.json`, `WORKOUTS.json`, `APPLE_HEALTH_SUMMARY.md`. Сырой `export.xml` **не сохраняется** — только агрегированный JSON.
+
 ## 5. Обогащение корпуса
 
 Нормализация анализов, LOINC, дедупликация, индексы:
@@ -106,6 +117,7 @@ cd deploy && ./02-rsync-corpus.sh
 | `medbots init PATH` | Создать структуру instance |
 | `medbots scan --bot-root PATH` | Добавить PDF из `sources/` в manifest |
 | `medbots extract-text --bot-root PATH` | PDF → `pdf_text/*.txt` |
+| `medbots import-apple-health --zip FILE --bot-root PATH` | Apple Health → `fitness/` |
 | `medbots structure --bot-root PATH` | Текст → `doc_text/`, строки анализов |
 | `medbots pipeline --bot-root PATH` | Merge labs, LOINC, dedup, индекс |
 | `medbots validate --corpus PATH` | Проверка целостности |

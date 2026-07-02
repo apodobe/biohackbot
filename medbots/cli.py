@@ -10,6 +10,7 @@ from pathlib import Path
 from medbots.config import find_bot_root
 from medbots.corpus_io import load_patient_dob, resolve_corpus
 from medbots.extract_pdf_text import run as run_extract
+from medbots.import_apple_health import run_import
 from medbots.init_instance import init as run_init
 from medbots.pipeline.run import run_pipeline
 from medbots.scan_sources import scan as run_scan
@@ -33,6 +34,26 @@ def _cmd_extract_text(args: argparse.Namespace) -> int:
     stats = run_extract(root, args.corpus)
     print(f"Extracted {stats['extracted']} PDF(s).")
     return 1 if stats["errors"] and stats["extracted"] == 0 else 0
+
+
+def _cmd_import_apple_health(args: argparse.Namespace) -> int:
+    root = Path(args.bot_root).resolve() if args.bot_root else find_bot_root()
+    stats = run_import(
+        root,
+        args.zip,
+        corpus=args.corpus,
+        copy_zip=args.copy_zip,
+    )
+    print(
+        f"Apple Health: {stats['daily_metric_days']} days, "
+        f"{stats['workouts']} workouts, quality={stats['quality']}"
+    )
+    return 0 if stats["quality"] != "fail" else 1
+
+
+def _cmd_validate_apple_health(args: argparse.Namespace) -> int:
+    corpus = resolve_corpus(args.corpus)
+    return subprocess.call([sys.executable, "-m", "medbots.validate_apple_health", "--corpus", str(corpus)])
 
 
 def _cmd_structure(args: argparse.Namespace) -> int:
@@ -97,6 +118,20 @@ def main(argv: list[str] | None = None) -> int:
     p_ext.add_argument("--bot-root", type=Path)
     p_ext.add_argument("--corpus", type=Path)
     p_ext.set_defaults(func=_cmd_extract_text)
+
+    p_ah = sub.add_parser(
+        "import-apple-health",
+        help="Import Apple Health export.zip into structured_database/fitness/",
+    )
+    p_ah.add_argument("--zip", type=Path, required=True, help="Apple Health export.zip from iPhone")
+    p_ah.add_argument("--bot-root", type=Path)
+    p_ah.add_argument("--corpus", type=Path)
+    p_ah.add_argument("--copy-zip", action="store_true", help="Archive zip under sources/apple_health/")
+    p_ah.set_defaults(func=_cmd_import_apple_health)
+
+    p_ah_val = sub.add_parser("validate-apple-health", help="Check fitness/ after Apple Health import")
+    p_ah_val.add_argument("--corpus", type=Path)
+    p_ah_val.set_defaults(func=_cmd_validate_apple_health)
 
     p_struct = sub.add_parser("structure", help="Parse pdf_text into doc_text and lab rows")
     p_struct.add_argument("--bot-root", type=Path)

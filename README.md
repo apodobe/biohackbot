@@ -74,6 +74,17 @@ medbots structure --bot-root ~/my-health
 
 Supported vendors: **EMIAS**, **Medsi**, **Gemotest** (Russian lab layouts).
 
+### Apple Health (optional)
+
+Export from iPhone: Health app → profile → Export All Health Data → `export.zip`
+
+```bash
+medbots import-apple-health --zip ~/Downloads/export.zip --bot-root ~/my-health --copy-zip
+medbots validate-apple-health --corpus ~/my-health/structured_database
+```
+
+Writes `structured_database/fitness/BODY_METRICS.json`, `WORKOUTS.json`, `APPLE_HEALTH_SUMMARY.md`. Raw `export.xml` is **not** stored — only aggregated JSON.
+
 ## 5. Enrich corpus
 
 Normalize labs, apply LOINC map, deduplicate, build indexes:
@@ -106,6 +117,7 @@ Details: [deploy/RUNBOOK.md](deploy/RUNBOOK.md)
 | `medbots init PATH` | Scaffold instance directory |
 | `medbots scan --bot-root PATH` | Add new PDFs from `sources/` to manifest |
 | `medbots extract-text --bot-root PATH` | PDF → `pdf_text/*.txt` |
+| `medbots import-apple-health --zip FILE --bot-root PATH` | Apple Health → `fitness/` |
 | `medbots structure --bot-root PATH` | Parse text → `doc_text/`, lab rows |
 | `medbots pipeline --bot-root PATH` | Merge labs, LOINC, dedup, index |
 | `medbots validate --corpus PATH` | Integrity check |

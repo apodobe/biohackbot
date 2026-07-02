@@ -37,11 +37,13 @@ medbots init ~/my-health
 ├── sources/emias/      ← 放入 PDF
 ├── sources/medsi/
 ├── sources/gemotest/
+├── sources/apple_health/   ← 可选：归档 export.zip
 └── structured_database/
     ├── manifest.json
     ├── PATIENT_PROFILE.json   ← 填写出生日期
     ├── pdf_text/
-    └── doc_text/
+    ├── doc_text/
+    └── fitness/               ← Apple Health 导入结果
 ```
 
 编辑 `PATIENT_PROFILE.json`：
@@ -69,6 +71,17 @@ medbots structure --bot-root ~/my-health
 
 支持 **EMIAS**、**Medsi**、**Gemotest**（俄语检验单格式）。
 
+### Apple Health（可选）
+
+iPhone：健康 → 个人资料 → 导出所有健康数据 → `export.zip`
+
+```bash
+medbots import-apple-health --zip ~/Downloads/export.zip --bot-root ~/my-health --copy-zip
+medbots validate-apple-health --corpus ~/my-health/structured_database
+```
+
+生成 `fitness/BODY_METRICS.json`、`WORKOUTS.json`、`APPLE_HEALTH_SUMMARY.md`。原始 `export.xml` **不保存**，仅聚合 JSON。
+
 ## 5.  enrichment
 
 ```bash
@@ -95,6 +108,7 @@ cd deploy && ./02-rsync-corpus.sh
 | `medbots init PATH` | 创建实例目录 |
 | `medbots scan --bot-root PATH` | 扫描 `sources/` 注册 PDF |
 | `medbots extract-text --bot-root PATH` | 提取 PDF 文本 |
+| `medbots import-apple-health --zip FILE --bot-root PATH` | Apple Health → `fitness/` |
 | `medbots structure --bot-root PATH` | 解析为结构化文档 |
 | `medbots pipeline --bot-root PATH` | 规范化与索引 |
 | `medbots validate --corpus PATH` | 完整性检查 |

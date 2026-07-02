@@ -20,9 +20,11 @@ def init(path: Path, *, force: bool = False) -> None:
         root / "sources" / "emias",
         root / "sources" / "medsi",
         root / "sources" / "gemotest",
+        root / "sources" / "apple_health",
         root / "structured_database" / "pdf_text",
         root / "structured_database" / "doc_text",
         root / "structured_database" / "labs",
+        root / "structured_database" / "fitness",
     ]
     for d in dirs:
         d.mkdir(parents=True, exist_ok=True)
@@ -67,6 +69,7 @@ def init(path: Path, *, force: bool = False) -> None:
     print(f"  4. medbots extract-text --bot-root {root}")
     print(f"  5. medbots structure --bot-root {root}")
     print(f"  6. medbots pipeline --bot-root {root}")
+    print(f"  Optional Apple Health: medbots import-apple-health --zip ~/Downloads/export.zip --bot-root {root}")
 
 
 def main() -> int:
