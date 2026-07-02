@@ -1,0 +1,25 @@
+# Python
+.venv/
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+dist/
+*.egg-info/
+
+# Secrets and private instance config
+*.env
+!*.env.example
+bot_config.json
+
+# Patient corpus — never commit to this public repo
+structured_database/**
+!structured_database/README.md
+sources/
+incoming/
+*.pdf
+
+# OS / logs
+.DS_Store
+*.log
+.browser-profile/
