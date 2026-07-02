@@ -9,6 +9,14 @@ Personal medical corpus pipeline: **install → add PDFs → parse → enrich**.
 
 > **Not medical advice.** Organizes your documents locally. Does not diagnose or prescribe.
 
+## Scope and limitations
+
+- **Package:** install as `medbots-core` from this repo; CLI command is `medbots`.
+- **PDF parsers:** built for **Russian lab layouts** — EMIAS, Medsi, Gemotest. Other vendors need a new parser ([docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)).
+- **No OCR:** scanned PDFs without a text layer are not parsed unless you add external OCR or optional private LLM ingest.
+- **OpenClaw / Telegram Q&A:** optional VPS deploy ([deploy/RUNBOOK.md](deploy/RUNBOOK.md)); not required for local corpus use.
+- **Try without your PDFs:** [examples/demo-instance](examples/demo-instance) (synthetic `pdf_text` only).
+
 ---
 
 ## 1. Install
@@ -37,11 +45,13 @@ This creates:
 ├── sources/emias/      ← drop PDFs here
 ├── sources/medsi/
 ├── sources/gemotest/
+├── sources/apple_health/   ← optional: archived export.zip
 └── structured_database/
     ├── manifest.json
     ├── PATIENT_PROFILE.json   ← set your DOB
     ├── pdf_text/
-    └── doc_text/
+    ├── doc_text/
+    └── fitness/               ← Apple Health import
 ```
 
 Edit `PATIENT_PROFILE.json`:
@@ -121,6 +131,16 @@ Details: [deploy/RUNBOOK.md](deploy/RUNBOOK.md)
 | `medbots structure --bot-root PATH` | Parse text → `doc_text/`, lab rows |
 | `medbots pipeline --bot-root PATH` | Merge labs, LOINC, dedup, index |
 | `medbots validate --corpus PATH` | Integrity check |
+| `medbots validate-apple-health --corpus PATH` | Apple Health fitness check |
+
+## Try the demo (no PDFs)
+
+```bash
+medbots structure --bot-root examples/demo-instance
+medbots pipeline --bot-root examples/demo-instance
+```
+
+See [examples/README.md](examples/README.md).
 
 ## Data privacy
 
@@ -130,6 +150,9 @@ Details: [deploy/RUNBOOK.md](deploy/RUNBOOK.md)
 
 ## Docs
 
+- [Architecture](docs/ARCHITECTURE.md)
+- [Parser guide — how to use every ingest step](docs/PARSERS.md) · [RU](docs/PARSERS.ru.md)
+- [LLM usage — when models are needed, tiers, OpenClaw](docs/LLM_GUIDE.md) · [RU](docs/LLM_GUIDE.ru.md)
 - [Corpus file schema](docs/CORPUS.md)
 - [License](LICENSE) — MIT, Copyright (c) 2026 Alexey Podobedov
 

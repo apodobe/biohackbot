@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "pdfs": [
+    {
+      "source_pdf": "sources/emias/2026-06-17__demo_Биохимический_анализ_крови.pdf",
+      "source_system": "emias",
+      "doc_type": "lab",
+      "created_at": "2026-06-17T12:00:00Z",
+      "sha256": "demo_emias_biochem_sha256_placeholder_000000000001",
+      "emias_title": "Биохимический анализ крови",
+      "extracted_txt": "pdf_text/sources__emias__2026-06-17__drop_Биохимический_анализ_крови__929313a8.pdf.txt"
+    },
+    {
+      "source_pdf": "sources/medsi/2026-06-16__demo_Биохимический_анализ_крови.pdf",
+      "source_system": "medsi",
+      "doc_type": "lab",
+      "created_at": "2026-06-16T12:00:00Z",
+      "sha256": "demo_medsi_biochem_sha256_placeholder_000000000002",
+      "user_drop_title": "Биохимический анализ крови",
+      "user_drop_batch": true,
+      "extracted_txt": "pdf_text/sources__medsi__2026-06-16__drop_Биохимический_анализ_крови__2e563e81.pdf.txt"
+    },
+    {
+      "source_pdf": "sources/gemotest/2021-02-14__demo_Биохимия_19_показателей.pdf",
+      "source_system": "gemotest",
+      "doc_type": "lab",
+      "created_at": "2021-02-14T12:00:00Z",
+      "sha256": "demo_gemotest_biochem_sha256_placeholder_000000000003",
+      "gemotest_title": "Биохимия 19 показателей",
+      "extracted_txt": "pdf_text/sources__gemotest__2021-02-14__gemotest_69371781__Биохимия_19_показателей__d6c4ee6e.pdf.txt"
+    }
+  ],
+  "images": [],
+  "meta": {
+    "demo": true,
+    "note": "Synthetic pdf_text only — no real PDFs or PHI"
+  }
+}

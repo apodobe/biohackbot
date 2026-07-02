@@ -70,6 +70,8 @@ def init(path: Path, *, force: bool = False) -> None:
     print(f"  5. medbots structure --bot-root {root}")
     print(f"  6. medbots pipeline --bot-root {root}")
     print(f"  Optional Apple Health: medbots import-apple-health --zip ~/Downloads/export.zip --bot-root {root}")
+    print(f"  Demo without PDFs: medbots structure --bot-root examples/demo-instance")
+    print(f"  Docs: docs/PARSERS.md, docs/ARCHITECTURE.md")
 
 
 def main() -> int:

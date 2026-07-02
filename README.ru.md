@@ -9,6 +9,14 @@ Pipeline для персонального медицинского корпус
 
 > **Не медицинская консультация.** Инструмент организует ваши документы локально. Не ставит диагнозы и не назначает лечение.
 
+## Область применения и ограничения
+
+- **Пакет:** `medbots-core` из этого репо; CLI — `medbots`.
+- **Парсеры PDF:** рассчитаны на **российские бланки** — ЕМИАС, Медси, Гемотест. Другие вендоры — новый парсер ([docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)).
+- **Без OCR:** сканы без текстового слоя не парсятся (нужен внешний OCR или приватный LLM-ingest).
+- **OpenClaw / Telegram:** опциональный деплой на VPS ([deploy/RUNBOOK.md](deploy/RUNBOOK.md)); для локального корпуса не обязателен.
+- **Демо без своих PDF:** [examples/demo-instance](examples/demo-instance).
+
 ---
 
 ## 1. Установка
@@ -121,6 +129,16 @@ cd deploy && ./02-rsync-corpus.sh
 | `medbots structure --bot-root PATH` | Текст → `doc_text/`, строки анализов |
 | `medbots pipeline --bot-root PATH` | Merge labs, LOINC, dedup, индекс |
 | `medbots validate --corpus PATH` | Проверка целостности |
+| `medbots validate-apple-health --corpus PATH` | Проверка Apple Health |
+
+## Демо без PDF
+
+```bash
+medbots structure --bot-root examples/demo-instance
+medbots pipeline --bot-root examples/demo-instance
+```
+
+См. [examples/README.md](examples/README.md).
 
 ## Конфиденциальность
 
@@ -130,6 +148,9 @@ cd deploy && ./02-rsync-corpus.sh
 
 ## Документация
 
+- [Архитектура](docs/ARCHITECTURE.md)
+- [Руководство по парсерам](docs/PARSERS.ru.md) · [EN](docs/PARSERS.md)
+- [LLM — когда нужны модели](docs/LLM_GUIDE.ru.md) · [EN](docs/LLM_GUIDE.md)
 - [Схема файлов корпуса](docs/CORPUS.md)
 - [License](LICENSE) — MIT, Copyright (c) 2026 Alexey Podobedov
 

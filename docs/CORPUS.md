@@ -44,6 +44,12 @@ Your private instance keeps prepared data in `structured_database/`.
 
 Use `medbots scan` to register new PDFs — do not edit `manifest.json` by hand unless needed.
 
+**Parser usage:** see [PARSERS.md](PARSERS.md) (EN) or [PARSERS.ru.md](PARSERS.ru.md) (RU).
+
+**LLM / OpenClaw:** see [LLM_GUIDE.md](LLM_GUIDE.md) (EN) or [LLM_GUIDE.ru.md](LLM_GUIDE.ru.md) (RU).
+
+**Architecture:** [ARCHITECTURE.md](ARCHITECTURE.md).
+
 ## Sources layout
 
 ```

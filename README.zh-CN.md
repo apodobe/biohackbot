@@ -9,6 +9,14 @@
 
 > **非医疗建议。** 仅在本地整理您的文档，不提供诊断或处方。
 
+## 适用范围与限制
+
+- **包名：** 本仓库安装为 `medbots-core`；CLI 命令为 `medbots`。
+- **PDF 解析器：** 面向**俄罗斯检验单**（EMIAS、Medsi、Gemotest）。其他厂商需新增解析器（[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)）。
+- **无 OCR：** 无文字层的扫描 PDF 无法解析（需外部 OCR 或私有 LLM ingest）。
+- **OpenClaw / Telegram：** 可选 VPS 部署；本地语料库不依赖它。
+- **无 PDF 试用：** [examples/demo-instance](examples/demo-instance)。
+
 ---
 
 ## 1. 安装
@@ -112,6 +120,16 @@ cd deploy && ./02-rsync-corpus.sh
 | `medbots structure --bot-root PATH` | 解析为结构化文档 |
 | `medbots pipeline --bot-root PATH` | 规范化与索引 |
 | `medbots validate --corpus PATH` | 完整性检查 |
+| `medbots validate-apple-health --corpus PATH` | Apple Health 检查 |
+
+## 无 PDF 演示
+
+```bash
+medbots structure --bot-root examples/demo-instance
+medbots pipeline --bot-root examples/demo-instance
+```
+
+见 [examples/README.md](examples/README.md)。
 
 ## 隐私
 
@@ -119,6 +137,9 @@ cd deploy && ./02-rsync-corpus.sh
 
 ## 文档
 
+- [架构说明](docs/ARCHITECTURE.md)（英文）
+- [解析器使用指南](docs/PARSERS.md)（英文）
+- [LLM 使用说明](docs/LLM_GUIDE.md)（英文）
 - [语料库文件说明](docs/CORPUS.md)
 - [License](LICENSE) — MIT, Copyright (c) 2026 Alexey Podobedov
 

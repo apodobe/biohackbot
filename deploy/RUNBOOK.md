@@ -35,3 +35,5 @@ cp deploy/openclaw.env.example ~/.config/medbot-openclaw.env
 ```
 
 Skill reads corpus from `/opt/medbot-corpus/structured_database` (adjust in `02-rsync-corpus.sh` if needed).
+
+**LLM tier for Q&A:** see [docs/LLM_GUIDE.md](../docs/LLM_GUIDE.md). Default private deploy uses `xai/grok-4.3` for the biohacking agent; preset brief buttons should stay script-only (no model).
