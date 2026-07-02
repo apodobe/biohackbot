@@ -1,7 +1,7 @@
 [project]
 name = "medbots-core"
 version = "0.1.0"
-description = "Medical / biohacking corpus pipeline (public biohackbot framework)"
+description = "Open-source pipeline: lab PDF ingest (EMIAS/Medsi/Gemotest), normalized health corpus, VPS deploy for personal medical bots"
 readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.11"
