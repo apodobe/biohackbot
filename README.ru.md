@@ -1,122 +1,124 @@
 # biohackbot
 
-**Открытый pipeline медицинского корпуса для персональных health / biohacking ботов**
+Pipeline для персонального медицинского корпуса: **установка → добавление PDF → парсинг → обогащение**.
 
 [English](README.md) · [Русский](README.ru.md) · [中文](README.zh-CN.md)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 
-**Автор:** [Alexey Podobedov](https://github.com/apodobe)
+> **Не медицинская консультация.** Инструмент организует ваши документы локально. Не ставит диагнозы и не назначает лечение.
 
 ---
 
-Превращает разрозненные PDF с анализами в структурированную базу знаний, готовую для AI — локально, под вашим контролем.
-
-`biohackbot` — это **`medbots-core`**: Python-инструменты для загрузки медицинских документов (ЕМИАС, Медси, Гемотест), нормализации лабораторных показателей, валидации корпуса и выкладки **только текстового** слоя на VPS для Telegram / OpenClaw Q&A ботов.
-
-> **Не является медицинской консультацией.** ПО помогает организовать *ваши* документы. Не ставит диагнозы, не назначает лечение и не заменяет врача.
-
-## Зачем это нужно
-
-Годами копятся анализы в личных кабинетах, PDF и мессенджерах. Обычные заметки не понимают русские бланки лабораторий. Чаты с LLM не помнят вашу историю. Этот проект даёт:
-
-- **Файловый корпус** (`structured_database/`), который может читать любой агент
-- **Парсеры под форматы** распространённых российских лабораторий
-- **Повторяемый pipeline** после каждой новой пачки PDF
-- **Чёткое разделение**: публичный код framework vs. приватные данные о здоровье
-
-Корпус остаётся **у вас** (локально или в **приватном** репозитории). В этом публичном репо **нет данных пациентов**.
-
-## Возможности
-
-| Область | Что есть |
-|---------|----------|
-| **Ingest** | Извлечение текста PyMuPDF, локальные парсеры EMIAS / Medsi / Gemotest |
-| **Анализы** | Нормализованные строки (`LABS_NORMALIZED.json`), LOINC, дедупликация |
-| **Pipeline** | Фаза 2: расхождения, цели, добавки, индекс корпуса |
-| **CLI** | `medbots pipeline`, `medbots patient-dob` |
-| **Деплой** | Шаблоны rsync на VPS + OpenClaw skills (`deploy/`) |
-| **Безопасность** | Pre-push hooks, CI secret scan, denylist путей корпуса |
-
-## Архитектура
-
-```mermaid
-flowchart TB
-  subgraph local [Ваш Mac — private]
-    pdf[sources/ PDF]
-    corpus[structured_database/]
-    cfg[bot_config.json]
-  end
-  subgraph public_repo [Этот репо — public]
-    medbots[пакет medbots]
-    pipeline[pipeline + парсеры]
-  end
-  subgraph vps [VPS — только текст]
-    rsync[rsync корпуса]
-    bot[Telegram / OpenClaw Q&A]
-  end
-  pdf --> medbots
-  medbots --> corpus
-  corpus --> rsync
-  rsync --> bot
-  cfg -.-> medbots
-```
-
-## Быстрый старт
+## 1. Установка
 
 ```bash
 git clone https://github.com/apodobe/biohackbot.git
 cd biohackbot
 python3 -m venv .venv && source .venv/bin/activate
-pip install -e ".[dev]"
-
-# Укажите СВОЙ приватный корпус (не коммитьте его в public repo)
-export MEDBOTS_CORPUS_PATH=/path/to/your/structured_database
-cp bot_config.example.json /path/to/your-instance/bot_config.json
-
-medbots pipeline --bot-root /path/to/your-instance
-pytest
+pip install -e .
+medbots --help
 ```
 
-### Git hooks (перед каждым push)
+## 2. Настройка (первый запуск)
+
+Создайте **приватную** папку для данных (не внутри этого public-репо):
 
 ```bash
-git config core.hooksPath .githooks
-chmod +x .githooks/pre-push
+medbots init ~/my-health
 ```
 
-Hooks блокируют API-ключи, `.env`, `bot_config.json` и любые файлы данных из `structured_database/` в этом публичном репозитории.
+Структура:
 
-## Структура репозитория
+```
+~/my-health/
+├── bot_config.json
+├── sources/emias/      ← сюда PDF
+├── sources/medsi/
+├── sources/gemotest/
+└── structured_database/
+    ├── manifest.json
+    ├── PATIENT_PROFILE.json   ← укажите дату рождения
+    ├── pdf_text/
+    └── doc_text/
+```
 
-| Путь | Назначение |
-|------|------------|
-| `medbots/` | Основной Python-пакет |
-| `docs/MED_BOTS_CORPUS_STANDARD.md` | Схема JSON и соглашения корпуса |
-| `deploy/` | rsync на VPS, шаблоны OpenClaw skills |
-| `bot_config.example.json` | Шаблон feature flags |
-| `structured_database/README.md` | Только указатель — корпус создаётся локально |
-| `tests/fixtures/` | Редактированные golden-файлы для парсеров |
+Отредактируйте `PATIENT_PROFILE.json`:
+
+```json
+{"dob": "1985-03-20", "full_name_ru": "Иван Иванов"}
+```
+
+## 3. Добавление документов
+
+Скопируйте PDF анализов из ЕМИАС, Медси или Гемотест в соответствующую папку `sources/`.
+
+Зарегистрируйте файлы в манифесте:
+
+```bash
+medbots scan --bot-root ~/my-health
+# только один источник: --source emias
+```
+
+## 4. Парсинг PDF
+
+Два шага: извлечь текст, затем разобрать в `doc_text/` и строки анализов.
+
+```bash
+medbots extract-text --bot-root ~/my-health
+medbots structure --bot-root ~/my-health
+# перепарсить всё: --force
+# один вендор: --source gemotest
+```
+
+Поддерживаются: **ЕМИАС**, **Медси**, **Гемотест**.
+
+## 5. Обогащение корпуса
+
+Нормализация анализов, LOINC, дедупликация, индексы:
+
+```bash
+medbots pipeline --bot-root ~/my-health
+medbots validate --corpus ~/my-health/structured_database
+```
+
+Результат: `LABS_NORMALIZED.json`, `DISCREPANCIES.json`, `CORPUS_INDEX.json` и markdown-сводки.
+
+## 6. Опционально: VPS (только текст)
+
+Синхронизация **JSON + текста** на сервер для приватного Q&A-бота (без PDF):
+
+```bash
+export VPS=root@YOUR_HOST
+export CORPUS=~/my-health/structured_database
+cd deploy && ./02-rsync-corpus.sh
+```
+
+Подробнее: [deploy/RUNBOOK.md](deploy/RUNBOOK.md)
+
+---
+
+## Команды CLI
+
+| Команда | Назначение |
+|---------|------------|
+| `medbots init PATH` | Создать структуру instance |
+| `medbots scan --bot-root PATH` | Добавить PDF из `sources/` в manifest |
+| `medbots extract-text --bot-root PATH` | PDF → `pdf_text/*.txt` |
+| `medbots structure --bot-root PATH` | Текст → `doc_text/`, строки анализов |
+| `medbots pipeline --bot-root PATH` | Merge labs, LOINC, dedup, индекс |
+| `medbots validate --corpus PATH` | Проверка целостности |
+
+## Конфиденциальность
+
+- Держите `~/my-health/` **локально** или в **private** git-репозитории.
+- Не коммитьте данные пациента в этот public-репозиторий.
+- См. [SECURITY.md](SECURITY.md).
 
 ## Документация
 
-- [Стандарт корпуса](docs/MED_BOTS_CORPUS_STANDARD.md)
-- [Runbook деплоя на VPS](deploy/RUNBOOK.md)
-- [Политика безопасности](SECURITY.md)
-- [Участие в разработке](CONTRIBUTING.md)
+- [Схема файлов корпуса](docs/CORPUS.md)
+- [License](LICENSE) — MIT, Copyright (c) 2026 Alexey Podobedov
 
-## Подключение как зависимость
-
-Приватный instance-репозиторий может подключить этот код через submodule:
-
-```bash
-git submodule add https://github.com/apodobe/biohackbot.git vendor/biohackbot
-pip install -e vendor/biohackbot
-```
-
-## Лицензия
-
-[MIT](LICENSE) — Copyright (c) 2026 Alexey Podobedov
-
-Используйте свободно, сохраняйте copyright, делайте то, что реально помогает людям жить лучше.
+**Автор:** [Alexey Podobedov](https://github.com/apodobe)

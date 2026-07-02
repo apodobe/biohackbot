@@ -1,85 +1,37 @@
-# BioHackBot — развёртывание на VPS (YOUR_VPS_HOST)
+# VPS deploy (optional)
 
-Отдельный корпус от idamedbot (мама): `/opt/medbot-corpus/structured_database`.
+Sync **text and JSON only** — no PDF binaries.
 
-**Деплой только через rsync с Mac** (`02-rsync-corpus.sh`). GitHub Actions и auto-deploy из git не используются.
+## Prerequisites
 
-**PDF на VPS не попадают:** rsync синхронизирует только подготовленный `structured_database/` (текст, JSON). Исключены `*.pdf` и `telegram_ingest/`. Папка `sources/` на сервер не копируется.
+- SSH access to your VPS
+- Local instance with `structured_database/` populated (`medbots pipeline` done)
 
-## 0. Переменные
+## Variables
 
 ```bash
-export VPS=root@YOUR_VPS_HOST
+export VPS=root@YOUR_HOST
+export CORPUS=$HOME/my-health/structured_database   # local corpus path
 ```
 
-## 1. Корпус (с Mac)
+## Sync corpus
 
 ```bash
-cd /path/to/your/biohackbot-instance/openclaw-vps-deploy
+cd deploy
 ./02-rsync-corpus.sh
 ```
 
-## 2. OpenClaw skill
+## OpenClaw skill (optional Q&A bot)
 
 ```bash
 ./03-install-skill-on-vps.sh
 ```
 
-### Q&A бот @your_medbot
-
-1. На VPS: `cp biohack-openclaw.env.example /root/.config/biohack-openclaw.env` и заполнить токен + user id.
-2. С Mac:
+Copy and fill env template on the server:
 
 ```bash
-./04-configure-biohack-telegram.sh
+cp deploy/openclaw.env.example ~/.config/medbot-openclaw.env
+# set TELEGRAM token and allowed user IDs
 ```
 
-3. Доступ только для `TELEGRAM_BIOHACK_ALLOWED_USER_IDS` (allowlist в OpenClaw).
-
-### Второй Telegram-бот (Q&A) — legacy note
-
-```bash
-ssh "$VPS" 'openclaw gateway restart'
-```
-
-## 3. Ingest-бот (PDF / фото / текст)
-
-```bash
-./09-install-biohack-ingest-bot.sh
-```
-
-На VPS:
-
-```bash
-cp /opt/medbot-ingest/biohack-ingest-bot.env.example /root/.config/biohacking-ingest-bot.env
-# заполнить TELEGRAM_INGEST_BOT_TOKEN, TELEGRAM_INGEST_ALLOWED_CHAT_IDS, XAI_API_KEY
-systemctl enable --now biohacking-ingest-bot
-```
-
-## 4. Напоминания (cron)
-
-Редактировать `structured_database/GOALS_REMINDERS.json`, затем rsync.
-
-```bash
-cp biohack-reminder.env.example -> /root/.config/biohack-reminder.env  # на VPS
-./07-install-reminder-cron.sh
-```
-
-## 5. Git
-
-```bash
-cd /path/to/your/biohackbot-instance
-git add . && git commit -m "..." && git push origin main
-```
-
-Опционально `INGEST_GIT_PUSH=1` на VPS для push после ingest.
-
-## Пути
-
-| Компонент | Путь на VPS |
-|-----------|-------------|
-| Corpus | `/opt/medbot-corpus/structured_database` |
-| Ingest | `/opt/medbot-ingest/` |
-| Skill | `/root/.openclaw/workspace/skills/biohacking-corpus/` |
-| Ingest env | `/root/.config/biohacking-ingest-bot.env` |
-| Reminder env | `/root/.config/biohack-reminder.env` |
+Skill reads corpus from `/opt/medbot-corpus/structured_database` (adjust in `02-rsync-corpus.sh` if needed).

@@ -1,0 +1,27 @@
+{
+  "bot_id": "my-medbot",
+  "patient_profile": "structured_database/PATIENT_PROFILE.json",
+  "corpus_path_env": "MEDBOTS_CORPUS_PATH",
+  "vps_corpus_path": "/opt/medbot-corpus/structured_database",
+  "features": {
+    "ingest_telegram": false,
+    "ingest_local_parsers": true,
+    "grok_ingest_fallback": false,
+    "apple_health": false,
+    "genetics": true,
+    "goals_reminders": true,
+    "weekly_pending": false,
+    "nutrition_import": true,
+    "fitness_modules": false,
+    "emias_chrome_download": false,
+    "medsi_playwright": false,
+    "research_briefs_keyboard": false,
+    "openfoodfacts_lookup": false,
+    "food_log": false,
+    "legacy_flat_pdf_paths": false,
+    "purge_foreign_records": true
+  },
+  "pipeline": {
+    "skip_if_missing": ["GOALS_REMINDERS.json"]
+  }
+}

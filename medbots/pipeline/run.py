@@ -76,12 +76,11 @@ def run_pipeline(
     if feature_enabled("goals_reminders", cfg):
         _run_module("medbots.pipeline.reconcile_goals", corp, ["--apply"])
 
-    _run_module("medbots.pipeline.write_composer_review_index", corp)
     _run_module("medbots.pipeline.validate_corpus", corp)
 
-    index_args: list[str] = []
-    if cfg.bot_id:
-        index_args = ["--bot", cfg.bot_id]
+    index_args: list[str] = ["--bot-root", str(root)]
+    if corp:
+        index_args.extend(["--corpus", str(corp)])
     cmd = [sys.executable, "-m", "medbots.pipeline.write_corpus_index", *index_args]
     print("==> write_corpus_index")
     subprocess.run(cmd, check=True, cwd=str(root), env={**os.environ, "MEDBOTS_CORPUS_PATH": str(corp)})

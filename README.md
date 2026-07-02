@@ -1,122 +1,124 @@
 # biohackbot
 
-**Open-source medical corpus pipeline for personal health & biohacking bots**
+Personal medical corpus pipeline: **install → add PDFs → parse → enrich**.
 
 [English](README.md) · [Русский](README.ru.md) · [中文](README.zh-CN.md)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 
-**Author:** [Alexey Podobedov](https://github.com/apodobe)
+> **Not medical advice.** Organizes your documents locally. Does not diagnose or prescribe.
 
 ---
 
-Turn scattered lab PDFs into a structured, AI-ready health knowledge base — locally, under your control.
-
-`biohackbot` ships **`medbots-core`**: a Python toolkit to ingest medical documents (EMIAS, Medsi, Gemotest), normalize lab results, validate your corpus, and deploy **text-only** data to a VPS for Telegram / OpenClaw Q&A bots.
-
-> **Not medical advice.** This software organizes *your* documents. It does not diagnose, prescribe, or replace a clinician.
-
-## Why this exists
-
-Most people collect years of lab results across portals, PDFs, and messengers. Generic note apps do not understand Russian lab layouts. LLM chats forget your history. This project gives you:
-
-- **A file-based corpus** (`structured_database/`) that any agent can read
-- **Vendor-specific parsers** for common Russian lab formats
-- **A repeatable pipeline** after each new PDF drop
-- **Clear separation**: public framework code vs. private health data
-
-Your corpus stays **on your machine** (or in a **private** repo). This public repository contains **no patient data**.
-
-## Features
-
-| Area | What you get |
-|------|----------------|
-| **Ingest** | PyMuPDF text extraction, local parsers for EMIAS / Medsi / Gemotest |
-| **Labs** | Normalized rows (`LABS_NORMALIZED.json`), LOINC mapping, deduplication |
-| **Pipeline** | Phase-2 enrichment: discrepancies, goals, supplements, corpus index |
-| **CLI** | `medbots pipeline`, `medbots patient-dob` |
-| **Deploy** | Generic VPS rsync + OpenClaw skill templates (`deploy/`) |
-| **Safety** | Pre-push hooks, CI secret scan, corpus path denylist |
-
-## Architecture
-
-```mermaid
-flowchart TB
-  subgraph local [Your Mac — private]
-    pdf[sources/ PDFs]
-    corpus[structured_database/]
-    cfg[bot_config.json]
-  end
-  subgraph public_repo [This repo — public]
-    medbots[medbots package]
-    pipeline[pipeline + parsers]
-  end
-  subgraph vps [VPS — text only]
-    rsync[rsync corpus]
-    bot[Telegram / OpenClaw Q&A]
-  end
-  pdf --> medbots
-  medbots --> corpus
-  corpus --> rsync
-  rsync --> bot
-  cfg -.-> medbots
-```
-
-## Quick start
+## 1. Install
 
 ```bash
 git clone https://github.com/apodobe/biohackbot.git
 cd biohackbot
-python3 -m venv .venv && source .venv/bin/activate
-pip install -e ".[dev]"
-
-# Point to YOUR private corpus (never commit this folder here)
-export MEDBOTS_CORPUS_PATH=/path/to/your/structured_database
-cp bot_config.example.json /path/to/your-instance/bot_config.json
-
-medbots pipeline --bot-root /path/to/your-instance
-pytest
+python3 -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
+pip install -e .
+medbots --help
 ```
 
-### Git hooks (required before push)
+## 2. Configure (first run)
+
+Create a **private** folder for your data (outside this public repo):
 
 ```bash
-git config core.hooksPath .githooks
-chmod +x .githooks/pre-push
+medbots init ~/my-health
 ```
 
-Hooks block API keys, `.env`, `bot_config.json`, and any `structured_database/` data files from entering this public repo.
+This creates:
 
-## Repository layout
+```
+~/my-health/
+├── bot_config.json
+├── sources/emias/      ← drop PDFs here
+├── sources/medsi/
+├── sources/gemotest/
+└── structured_database/
+    ├── manifest.json
+    ├── PATIENT_PROFILE.json   ← set your DOB
+    ├── pdf_text/
+    └── doc_text/
+```
 
-| Path | Purpose |
-|------|---------|
-| `medbots/` | Core Python package |
-| `docs/MED_BOTS_CORPUS_STANDARD.md` | JSON schema & corpus conventions |
-| `deploy/` | VPS rsync, OpenClaw skills (templates) |
-| `bot_config.example.json` | Feature flags template |
-| `structured_database/README.md` | Pointer only — create corpus locally |
-| `tests/fixtures/` | Redacted parser golden files |
+Edit `PATIENT_PROFILE.json`:
 
-## Documentation
+```json
+{"dob": "1985-03-20", "full_name_ru": "Your Name"}
+```
 
-- [Corpus standard](docs/MED_BOTS_CORPUS_STANDARD.md) — required files, manifest schema, AI read order
-- [VPS deploy runbook](deploy/RUNBOOK.md)
-- [Security policy](SECURITY.md)
-- [Contributing](CONTRIBUTING.md)
+## 3. Add documents
 
-## Use as a dependency
+Copy lab PDFs from EMIAS, Medsi, or Gemotest into the matching `sources/` subfolder.
 
-Private instance repos can vendor this repo:
+Register them in the manifest:
 
 ```bash
-git submodule add https://github.com/apodobe/biohackbot.git vendor/biohackbot
-pip install -e vendor/biohackbot
+medbots scan --bot-root ~/my-health
+# optional: --source emias --source medsi
 ```
 
-## License
+## 4. Parse PDFs
 
-[MIT](LICENSE) — Copyright (c) 2026 Alexey Podobedov
+Two steps: extract raw text, then parse into structured `doc_text/` and lab rows.
 
-Use freely, keep the copyright notice, build something that helps people live better.
+```bash
+medbots extract-text --bot-root ~/my-health
+medbots structure --bot-root ~/my-health
+# re-parse everything: add --force
+# one vendor only: --source emias
+```
+
+Supported vendors: **EMIAS**, **Medsi**, **Gemotest** (Russian lab layouts).
+
+## 5. Enrich corpus
+
+Normalize labs, apply LOINC map, deduplicate, build indexes:
+
+```bash
+medbots pipeline --bot-root ~/my-health
+medbots validate --corpus ~/my-health/structured_database
+```
+
+Output includes `LABS_NORMALIZED.json`, `DISCREPANCIES.json`, `CORPUS_INDEX.json`, and markdown summaries in `structured_database/`.
+
+## 6. Optional: VPS (text only)
+
+Sync **text + JSON** to a server for a private Q&A bot (no PDF binaries):
+
+```bash
+export VPS=root@YOUR_HOST
+export CORPUS=~/my-health/structured_database
+cd deploy && ./02-rsync-corpus.sh
+```
+
+Details: [deploy/RUNBOOK.md](deploy/RUNBOOK.md)
+
+---
+
+## CLI reference
+
+| Command | Purpose |
+|---------|---------|
+| `medbots init PATH` | Scaffold instance directory |
+| `medbots scan --bot-root PATH` | Add new PDFs from `sources/` to manifest |
+| `medbots extract-text --bot-root PATH` | PDF → `pdf_text/*.txt` |
+| `medbots structure --bot-root PATH` | Parse text → `doc_text/`, lab rows |
+| `medbots pipeline --bot-root PATH` | Merge labs, LOINC, dedup, index |
+| `medbots validate --corpus PATH` | Integrity check |
+
+## Data privacy
+
+- Keep `~/my-health/` **local** or in a **private** git repo.
+- Never commit patient data to this public repository.
+- See [SECURITY.md](SECURITY.md).
+
+## Docs
+
+- [Corpus file schema](docs/CORPUS.md)
+- [License](LICENSE) — MIT, Copyright (c) 2026 Alexey Podobedov
+
+**Author:** [Alexey Podobedov](https://github.com/apodobe)

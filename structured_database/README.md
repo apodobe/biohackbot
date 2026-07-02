@@ -1,13 +1,11 @@
-# structured_database (local only)
+# structured_database
 
-This directory holds your **private** prepared health corpus (`pdf_text/`, `doc_text/`, JSON, prompts).
+Your **private** prepared corpus lives here in your instance directory — not in this public repository.
 
-**Do not commit patient data to the public [biohackbot](https://github.com/apodobe/biohackbot) repository.**
-
-Create `structured_database/` locally (or in a private fork) and point tools at it:
+Create it with:
 
 ```bash
-export MEDBOTS_CORPUS_PATH=/path/to/your/structured_database
+medbots init ~/my-health
 ```
 
-Schema and required files: [docs/MED_BOTS_CORPUS_STANDARD.md](../docs/MED_BOTS_CORPUS_STANDARD.md).
+See [README](../README.md) and [docs/CORPUS.md](../docs/CORPUS.md).
