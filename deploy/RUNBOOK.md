@@ -31,7 +31,8 @@ Copy and fill env template on the server:
 
 ```bash
 cp deploy/openclaw.env.example ~/.config/medbot-openclaw.env
-# set TELEGRAM token and allowed user IDs
+chmod 600 ~/.config/medbot-openclaw.env
+# set TELEGRAM token and allowed user IDs (never leave ALLOWED_USER_IDS empty in production)
 ```
 
 Skill reads corpus from `/opt/medbot-corpus/structured_database` (adjust in `02-rsync-corpus.sh` if needed).

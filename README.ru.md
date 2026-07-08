@@ -55,7 +55,7 @@ medbots init ~/my-health
 Отредактируйте `PATIENT_PROFILE.json`:
 
 ```json
-{"dob": "1985-03-20", "full_name_ru": "Иван Иванов"}
+{"dob": "1985-06-15", "full_name_ru": "John Smith", "country": "USA"}
 ```
 
 ## 3. Добавление документов

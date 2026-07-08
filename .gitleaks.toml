@@ -1,0 +1,16 @@
+title = "biohackbot gitleaks"
+
+[allowlist]
+description = "Ignore mock patient tokens in public fixtures"
+paths = [
+  '''tests/fixtures/''',
+  '''examples/demo-instance/''',
+]
+
+[[allowlist.regexes]]
+description = "Mock US insurance id in fixtures"
+regex = '''US-MOCK-INS-'''
+
+[[allowlist.regexes]]
+description = "Mock deploy placeholders"
+regex = '''TELEGRAM_BOT_TOKEN=\s*$'''

@@ -36,7 +36,7 @@ def init(path: Path, *, force: bool = False) -> None:
     if not profile.exists() or force:
         profile.write_text(
             json.dumps(
-                {"dob": "YYYY-MM-DD", "full_name_ru": "Your Name"},
+                {"dob": "1985-06-15", "full_name_ru": "John Smith", "country": "USA"},
                 ensure_ascii=False,
                 indent=2,
             )
