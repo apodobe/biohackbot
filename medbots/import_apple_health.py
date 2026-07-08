@@ -15,6 +15,7 @@ from typing import Any
 from xml.etree.ElementTree import iterparse
 
 from medbots.corpus_io import load_patient_dob, resolve_corpus
+from medbots.zip_safety import UnsafeZipError, validate_zip_archive
 
 VALID_DATE_MIN = "2015-01-01"
 
@@ -220,6 +221,7 @@ def stream_import(zip_path: Path) -> tuple[dict[str, DailyAgg], list[dict], Impo
     export_dob: str | None = None
 
     with zipfile.ZipFile(zip_path) as zf:
+        validate_zip_archive(zf, zip_size=zip_path.stat().st_size)
         xml_name = find_main_xml(zf)
         routes = [
             i.filename
@@ -393,6 +395,7 @@ def build_body_metrics(daily: dict[str, DailyAgg]) -> list[dict[str, Any]]:
 def parse_ecg_from_zip(zip_path: Path) -> list[dict[str, Any]]:
     records: list[dict[str, Any]] = []
     with zipfile.ZipFile(zip_path) as zf:
+        validate_zip_archive(zf, zip_size=zip_path.stat().st_size)
         for info in zf.infolist():
             if "electrocardiograms/" not in info.filename or not info.filename.endswith(".csv"):
                 continue
@@ -427,6 +430,7 @@ def parse_ecg_from_zip(zip_path: Path) -> list[dict[str, Any]]:
 def list_gpx_index(zip_path: Path) -> list[dict[str, Any]]:
     out: list[dict[str, Any]] = []
     with zipfile.ZipFile(zip_path) as zf:
+        validate_zip_archive(zf, zip_size=zip_path.stat().st_size)
         for info in zf.infolist():
             if "workout-routes/" not in info.filename or not info.filename.endswith(".gpx"):
                 continue
