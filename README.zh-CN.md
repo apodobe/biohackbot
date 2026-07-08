@@ -57,7 +57,7 @@ medbots init ~/my-health
 编辑 `PATIENT_PROFILE.json`：
 
 ```json
-{"dob": "1985-03-20", "full_name_ru": "Your Name"}
+{"dob": "1985-06-15", "full_name_ru": "John Smith", "country": "USA"}
 ```
 
 ## 3. 添加文档

@@ -42,7 +42,7 @@ medbots validate-apple-health --corpus ~/my-health/structured_database
 2. **Set date of birth** in `structured_database/PATIENT_PROFILE.json` — used for age-based reference ranges and Apple Health quality checks:
 
    ```json
-   {"dob": "1985-03-20", "full_name_ru": "Your Name"}
+   {"dob": "1985-06-15", "full_name_ru": "John Smith", "country": "USA"}
    ```
 
 3. **Copy source files** into the right folder (see vendor sections below).

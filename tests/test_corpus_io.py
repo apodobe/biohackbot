@@ -39,9 +39,9 @@ def test_load_manifest_missing_returns_empty(tmp_path: Path) -> None:
 
 def test_load_patient_dob_from_profile(tmp_corpus: Path) -> None:
     (tmp_corpus / "PATIENT_PROFILE.json").write_text(
-        json.dumps({"dob": "1985-03-20"}), encoding="utf-8"
+        json.dumps({"dob": "1985-06-15"}), encoding="utf-8"
     )
-    assert load_patient_dob(tmp_corpus) == "1985-03-20"
+    assert load_patient_dob(tmp_corpus) == "1985-06-15"
 
 
 def test_load_patient_dob_fallback(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
@@ -55,10 +55,10 @@ def test_resolve_owner_dob_accepts_repo_root(tmp_path: Path) -> None:
     corpus = tmp_path / "structured_database"
     corpus.mkdir()
     (corpus / "PATIENT_PROFILE.json").write_text(
-        json.dumps({"dob": "1985-03-20"}), encoding="utf-8"
+        json.dumps({"dob": "1985-06-15"}), encoding="utf-8"
     )
     repo = tmp_path
-    assert resolve_owner_dob(repo) == "1985-03-20"
+    assert resolve_owner_dob(repo) == "1985-06-15"
 
 
 def test_manifest_vendor_index_uses_pdfs_key(tmp_corpus: Path) -> None:

@@ -42,7 +42,7 @@ medbots validate-apple-health --corpus ~/my-health/structured_database
 2. **Указать дату рождения** в `structured_database/PATIENT_PROFILE.json` — нужна для референсов и проверки Apple Health:
 
    ```json
-   {"dob": "1985-03-20", "full_name_ru": "Иван Иванов"}
+   {"dob": "1985-06-15", "full_name_ru": "John Smith", "country": "USA"}
    ```
 
 3. **Положить файлы** в нужную папку `sources/` (см. разделы по вендорам).

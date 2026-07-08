@@ -19,6 +19,9 @@ DENY_CONTENT = [
     re.compile(r"TELEGRAM_[A-Z_]*TOKEN\s*=\s*[^\s#]+", re.IGNORECASE),
     re.compile(r"Подобедов"),
     re.compile(r"72\.56\.79\.23"),
+    re.compile(r"7752900844000725"),
+    re.compile(r"Алексей\s+Юрьевич"),
+    re.compile(r"20\.03\.1985"),
 ]
 
 PUBLIC_BLOCKED_PATHS = re.compile(

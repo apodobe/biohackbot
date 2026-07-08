@@ -62,21 +62,21 @@ def test_extract_dates_no_match() -> None:
 
 
 def test_is_owner_patient_text_owner() -> None:
-    text = "Дата рождения пациента\n20.03.1985"
-    ok, reason = is_owner_patient_text(text, owner_dob="1985-03-20")
+    text = "Дата рождения пациента\n15.06.1985"
+    ok, reason = is_owner_patient_text(text, owner_dob="1985-06-15")
     assert ok is True
     assert reason == ""
 
 
 def test_is_owner_patient_text_child() -> None:
     text = "Мальчик, 3 года"
-    ok, reason = is_owner_patient_text(text, owner_dob="1985-03-20")
+    ok, reason = is_owner_patient_text(text, owner_dob="1985-06-15")
     assert ok is False
     assert reason == "child_marker"
 
 
 def test_is_owner_patient_text_wrong_dob() -> None:
     text = "Дата рождения: 01.01.1980"
-    ok, reason = is_owner_patient_text(text, owner_dob="1985-03-20")
+    ok, reason = is_owner_patient_text(text, owner_dob="1985-06-15")
     assert ok is False
     assert reason.startswith("patient_dob=")
